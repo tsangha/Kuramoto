@@ -8,7 +8,7 @@ import { TrendingUp, Lightbulb } from 'lucide-react';
  * JourneyView Component
  * Educational journey through parameter space with visualizations and insights
  */
-export default function JourneyView({ runs }) {
+export default function JourneyView({ runs, onLoadRun }) {
   // Detect insights from runs
   const insights = useMemo(() => detectInsights(runs), [runs]);
 

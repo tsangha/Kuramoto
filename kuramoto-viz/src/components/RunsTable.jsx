@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Trash2, ChevronUp, ChevronDown, Edit2, Check, X } from 'lucide-react';
+import { Trash2, ChevronUp, ChevronDown, Edit2, Check, X, Upload } from 'lucide-react';
 import { deleteRun, updateRun } from '../utils/runStorage';
 import { classifySyncState } from '../utils/runMetrics';
 
 /**
  * RunsTable Component
- * Sortable table view of all saved runs with delete functionality
+ * Sortable table view of all saved runs with delete and load functionality
  */
-export default function RunsTable({ runs, onRunsChanged }) {
+export default function RunsTable({ runs, onRunsChanged, onLoadRun }) {
   const [sortKey, setSortKey] = useState('timestamp');
   const [sortDirection, setSortDirection] = useState('desc');
   const [editingId, setEditingId] = useState(null);
@@ -27,8 +27,8 @@ export default function RunsTable({ runs, onRunsChanged }) {
         bVal = new Date(b.timestamp).getTime();
         break;
       case 'K':
-        aVal = a.parameters.K;
-        bVal = b.parameters.K;
+        aVal = a.parameters.K || a.parameters.K_stim || 0;
+        bVal = b.parameters.K || b.parameters.K_stim || 0;
         break;
       case 'N':
         aVal = a.parameters.N;
@@ -39,8 +39,8 @@ export default function RunsTable({ runs, onRunsChanged }) {
         bVal = b.parameters.noiseLevel;
         break;
       case 'network':
-        aVal = a.network.type;
-        bVal = b.network.type;
+        aVal = a.network?.type || 'attention';
+        bVal = b.network?.type || 'attention';
         break;
       case 'finalR':
         aVal = a.metrics.finalR;
@@ -201,16 +201,16 @@ export default function RunsTable({ runs, onRunsChanged }) {
                     {formatDate(run.timestamp)}
                   </td>
                   <td className="px-4 py-3 text-sm font-mono font-semibold">
-                    {run.parameters.K.toFixed(2)}
+                    {(run.parameters.K || run.parameters.K_stim || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm font-mono">
-                    {run.parameters.N}
+                    {run.parameters.N || run.parameters.gridSize || '-'}
                   </td>
                   <td className="px-4 py-3 text-sm font-mono">
                     {run.parameters.noiseLevel.toFixed(2)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    {formatNetworkType(run.network.type)}
+                    {run.network ? formatNetworkType(run.network.type) : 'Attention Field'}
                   </td>
                   <td className="px-4 py-3 text-sm font-mono font-bold">
                     {run.metrics.finalR.toFixed(3)}
@@ -224,13 +224,25 @@ export default function RunsTable({ runs, onRunsChanged }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleDelete(run.id)}
-                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive hover:text-destructive-foreground h-8 w-8 p-0"
-                      title="Delete run"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {onLoadRun && (
+                        <button
+                          onClick={() => onLoadRun(run)}
+                          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:bg-primary hover:text-primary-foreground h-8 px-3 gap-1 border border-input"
+                          title="Load this run"
+                        >
+                          <Upload size={14} />
+                          <span className="text-xs">Load</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(run.id)}
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-destructive hover:text-destructive-foreground h-8 w-8 p-0"
+                        title="Delete run"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

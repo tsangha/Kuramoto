@@ -9,7 +9,7 @@ import JourneyView from './JourneyView';
  * RunHistoryPanel Component
  * Main interface for viewing and analyzing saved simulation runs
  */
-export default function RunHistoryPanel({ isOpen, onClose, runs, onDeleteRun, onClearAll }) {
+export default function RunHistoryPanel({ isOpen, onClose, runs, onDeleteRun, onClearAll, onLoadRun }) {
   const [activeTab, setActiveTab] = useState('journey');
   const [localRuns, setLocalRuns] = useState(runs);
 
@@ -122,10 +122,10 @@ export default function RunHistoryPanel({ isOpen, onClose, runs, onDeleteRun, on
                     </div>
                   ) : (
                     <>
-                      {activeTab === 'journey' && <JourneyView runs={runs} />}
+                      {activeTab === 'journey' && <JourneyView runs={runs} onLoadRun={onLoadRun} />}
                       {activeTab === 'table' && (
                         <div className="space-y-4">
-                          <RunsTable runs={runs} onRunsChanged={handleRunsChanged} />
+                          <RunsTable runs={runs} onRunsChanged={handleRunsChanged} onLoadRun={onLoadRun} />
                           {runs.length > 0 && (
                             <div className="flex justify-end">
                               <button
